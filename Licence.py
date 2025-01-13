@@ -12,16 +12,22 @@ def preprocess_image(image):
     dilated_edges = cv2.dilate(edges, None, iterations=1)
     
     contours, _ = cv2.findContours(dilated_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    if contours:
-        largest_contour = max(contours, key=cv2.contourArea)
-        x, y, w, h = cv2.boundingRect(largest_contour)
-        roi = image[y:y + h, x:x + w]  # Crop the license plate region
-        resized_image = cv2.resize(roi, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)
-    else:
-        resized_image = cv2.resize(image, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)
+    roi = None
 
-    return resized_image
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        aspect_ratio = w / float(h)
+        if 2.0 < aspect_ratio < 5.0:  # Adjust aspect ratio for license plates
+            roi = image[y:y + h, x:x + w]
+            break
+            
+    if roi is None:
+        print("No suitable contour detected; resizing the entire image.")
+        roi = cv2.resize(image, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)
+    else:
+        roi = cv2.resize(roi, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)
+
+    return roi
 
 def recognize_text_from_image(image):
     processed_image = preprocess_image(image)
@@ -57,7 +63,11 @@ while True:
         print("Captured image saved as 'captured_license_plate.jpg'.")
         recognized_text = recognize_text_from_image(captured_image)
         print("Recognized License Plate Number:", recognized_text)
-
+        
+        with open('recognized_license_plate.txt', 'w') as file:
+            file.write(recognized_text)
+        print("Recognized text saved to 'recognized_license_plate.txt'.")
+        
     if key == ord('q'):
         break
 
