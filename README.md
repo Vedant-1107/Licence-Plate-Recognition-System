@@ -27,3 +27,17 @@ This project captures video from a webcam to detect and recognize license plate 
 Install the required Python packages using pip:
 ```bash
 pip install opencv-python pytesseract
+```
+
+## Usage
+
+- Position the license plate within the green rectangle (ROI) on the webcam feed.
+- Press `c` to capture and process the image.
+- The captured license plate is saved as captured_license_plate.jpg.
+- The recognized license plate number is displayed in the terminal.
+- Press `q` to exit the application.
+
+## Known Issues
+
+- The OCR accuracy may vary under poor lighting or due to blurry images.
+- Incorrect results may occur if the license plate has non-standard fonts or designs.
